@@ -33,16 +33,26 @@ class App extends Component {
     const networkId = await web3.eth.net.getId();
     if(networkId === 97) {//TODO: cambiar a 56
       // Asignar contracto
-      const presaleContract = new web3.eth.Contract(PresaleContract.abi, PresaleContract.address);
-      this.setState({ presaleContract });
+      const presaleContract = new web3.eth.Contract(PresaleContract.abi, PresaleContract.address)
+      this.setState({ presaleContract })
       
-      const owner = await presaleContract.methods.owner().call()
-      console.log(owner)
+      const tokenAddress = await presaleContract.methods.token().call()
+      this.setState({ tokenAddress })
 
-      this.setState({ loading: false });
+      this.setState({ loading: false })
     } else {
       window.alert('Network error, change to Binance Smart Chain and reload the page.');
     }
+  }
+
+  buyTokens = (bnbAmount) => {
+    this.setState({ loading: true });
+
+    this.state.presaleContract.methods.invest().send({ value: bnbAmount, from: this.state.account })
+    .on('confirmation', (confirmationNumber) => {
+      this.setState({ loading: false });
+      window.location.reload();
+    });
   }
 
   constructor(props) {
@@ -50,6 +60,7 @@ class App extends Component {
     this.state = {
       account: '',
       presaleContract: {},
+      tokenAddress: {},
       loading: true
     }
   }
@@ -60,7 +71,8 @@ class App extends Component {
       content = <p id="loader" className="text-center">Loading...</p>
     } else {
       content = <Main 
-        // TODO:
+        tokenAddress={ this.state.tokenAddress }
+        buyTokens={ this.buyTokens }
       />
     }
 

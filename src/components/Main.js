@@ -7,12 +7,12 @@ class Main extends Component {
                 <table className="table table-borderless text-muted text-center">
                     <thead>
                         <tr>
-                            <th scope="col">Emyem Wallet Balance</th>
+                            <th scope="col">Token Contract</th>
                         </tr>
                     </thead>
                     <tbody>
                         <tr>
-                            <td>{/*{window.web3.utils.fromWei(this.props.tokenV1Balance, 'Ether')}*/}0 Emyem</td>
+                            <td>{ this.props.tokenAddress }</td>
                         </tr>
                     </tbody>
                 </table>
@@ -21,15 +21,15 @@ class Main extends Component {
                     <div className="card-body">
                         <form className="mb-3" onSubmit={(event) => {
                             event.preventDefault();
-                            let amount;
-                            amount = this.input.value.toString();
-                            amount = window.web3.utils.toWei(amount, 'Ether');
-                            this.props.swapVersions(amount);
+                            let bnbAmount;
+                            bnbAmount = this.input.value.toString();
+                            bnbAmount = window.web3.utils.toWei(bnbAmount, 'Ether');
+                            this.props.buyTokens(bnbAmount);
                         }}>
                             <div>
                                 <label className="float-left"><b>Buy MYM with BNB</b></label>
                             </div>
-                            <div className="input-group mb-4">
+                            <div className="input-group mb-1">
                                 <input
                                 type="text"
                                 ref={(input) => { this.input = input }}
@@ -38,20 +38,21 @@ class Main extends Component {
                                 required />
                                 <div className="input-group-append">
                                     <div className="input-group-text">
-                                        MYM
+                                        BNB
                                     </div>
                                 </div>
                             </div>
-                            <button disabled={ this.props.swapAvailable } type="submit" className="btn btn-primary btn-block btn-lg">BUY</button>
+                            <p className="mt-0 mb-3 text-center">Min. 0.10 BNB / Max. 10 BNB</p>
+                            <button disabled={ this.props.presaleAvailable } type="submit" className="btn btn-primary btn-block btn-lg">BUY</button>
                         </form>
 
                         <button 
-                        disabled={ this.props.claimAvailable }
+                        //TODO:disabled={ this.props.claimAvailable }
                         type="submit" 
                         className="btn btn-outline-primary btn-block"
                         onClick={(event) => {
                             event.preventDefault();
-                            this.props.releaseTokens();
+                            // TODO:this.props.releaseTokens();
                         }}>
                         
                             CLAIM MYM
