@@ -1,44 +1,77 @@
 import React, { Component } from 'react';
-import logo from '../logo.png';
 import './App.css';
+import Navbar from './Navbar';
+import Main from './Main';
+import Web3 from 'web3';
+import PresaleContract from '../abis/PresaleContract';
 
 class App extends Component {
+  async componentWillMount() {
+    await this.loadWeb3();
+    await this.loadBlockchainData();
+  }
+
+  async loadWeb3() {
+    if(window.ethereum) {
+      window.web3 = new Web3(window.ethereum);
+      await window.ethereum.request({ method: 'eth_requestAccounts' });
+    } else if(window.web3) {
+      window.web3 = new Web3(window.web3.currentProvider);
+    } else {
+      window.alert('No ethereum browser is installed. Try it installing MetaMask.');
+    }
+  }
+
+  async loadBlockchainData() {
+    const web3 = window.web3;
+	
+    // Cargar cuenta
+    const accounts = await web3.eth.getAccounts();
+    this.setState({ account: accounts[0] });
+
+    // Recoger contrato
+    const networkId = await web3.eth.net.getId();
+    if(networkId === 97) {//TODO: cambiar a 56
+      // Asignar contracto
+      const presaleContract = new web3.eth.Contract(PresaleContract.abi, PresaleContract.address);
+      this.setState({ presaleContract });
+      
+      const owner = await presaleContract.methods.owner().call()
+      console.log(owner)
+
+      this.setState({ loading: false });
+    } else {
+      window.alert('Network error, change to Binance Smart Chain and reload the page.');
+    }
+  }
+
+  constructor(props) {
+    super(props);
+    this.state = {
+      account: '',
+      presaleContract: {},
+      loading: true
+    }
+  }
+
   render() {
+    let content;
+    if(this.state.loading) {
+      content = <p id="loader" className="text-center">Loading...</p>
+    } else {
+      content = <Main 
+        // TODO:
+      />
+    }
+
     return (
       <div>
-        <nav className="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-          <a
-            className="navbar-brand col-sm-3 col-md-2 mr-0"
-            href="http://www.dappuniversity.com/bootcamp"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Dapp University
-          </a>
-        </nav>
+        <Navbar account={ this.state.account } />
         <div className="container-fluid mt-5">
           <div className="row">
-            <main role="main" className="col-lg-12 d-flex text-center">
+            <main role="main" className="col-lg-12 ml-auto mr-auto" style={{ maxWidth: '600px' }}>
               <div className="content mr-auto ml-auto">
-                <a
-                  href="http://www.dappuniversity.com/bootcamp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <img src={logo} className="App-logo" alt="logo" />
-                </a>
-                <h1>Dapp University Starter Kit</h1>
-                <p>
-                  Edit <code>src/components/App.js</code> and save to reload.
-                </p>
-                <a
-                  className="App-link"
-                  href="http://www.dappuniversity.com/bootcamp"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  LEARN BLOCKCHAIN <u><b>NOW! </b></u>
-                </a>
+                {content}
               </div>
             </main>
           </div>
