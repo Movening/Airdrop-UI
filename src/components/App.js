@@ -38,6 +38,21 @@ class App extends Component {
       
       const tokenAddress = await presaleContract.methods.token().call()
       this.setState({ tokenAddress })
+      
+      let presaleEnding = await presaleContract.methods.ending().call()
+      let actualTime = Date.now() / 1000 | 0
+
+      // Revisa si está dentro de la whitelist.
+      let whitelist = await presaleContract.methods.whitelist(this.state.account).call()
+      if(whitelist === true && presaleEnding.toNumber() >= actualTime) {
+        this.setState({ buyAvailable: false })
+      }
+
+      // Recoge tiempo en el que se va a poder hacer claim.
+      let cooldownTime = await presaleContract.methods.claimReady(this.state.account).call()
+      if(cooldownTime.toNumber() <= actualTime && whitelist === true && presaleEnding.toNumber() != 0 && presaleEnding.toNumber() <= actualTime) {
+        this.setState({ claimAvailable: false })
+      }
 
       this.setState({ loading: false })
     } else {
@@ -71,6 +86,8 @@ class App extends Component {
       account: '',
       presaleContract: {},
       tokenAddress: {},
+      buyAvailable: true,
+      claimAvailable: true,
       loading: true
     }
   }
@@ -84,6 +101,8 @@ class App extends Component {
         tokenAddress={ this.state.tokenAddress }
         buyTokens={ this.buyTokens }
         claimTokens={ this.claimTokens }
+        buyAvailable={ this.state.buyAvailable }
+        claimAvailable={ this.state.claimAvailable }
       />
     }
 

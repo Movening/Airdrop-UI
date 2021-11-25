@@ -43,11 +43,11 @@ class Main extends Component {
                                 </div>
                             </div>
                             <p className="mt-0 mb-3 text-center">Min. 0.10 BNB / Max. 10 BNB</p>
-                            <button /*{disabled={ this.props.presaleAvailable }}*/ type="submit" className="btn btn-primary btn-block btn-lg">BUY</button>
+                            <button disabled={ this.props.buyAvailable } type="submit" className="btn btn-primary btn-block btn-lg">BUY</button>
                         </form>
 
                         <button 
-                        //TODO:disabled={ this.props.claimAvailable }
+                        disabled={ this.props.claimAvailable }
                         type="submit" 
                         className="btn btn-outline-primary btn-block"
                         onClick={(event) => {
