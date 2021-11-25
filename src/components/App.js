@@ -55,6 +55,16 @@ class App extends Component {
     });
   }
 
+  claimTokens = () => {
+    this.setState({ loading: true });
+
+    this.state.presaleContract.methods.claimTokens().send({ from: this.state.account })
+    .on('confirmation', (confirmationNumber) => {
+      this.setState({ loading: false });
+      window.location.reload();
+    });
+  }
+
   constructor(props) {
     super(props);
     this.state = {
@@ -73,6 +83,7 @@ class App extends Component {
       content = <Main 
         tokenAddress={ this.state.tokenAddress }
         buyTokens={ this.buyTokens }
+        claimTokens={ this.claimTokens }
       />
     }
 

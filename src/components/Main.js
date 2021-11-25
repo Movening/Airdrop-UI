@@ -43,7 +43,7 @@ class Main extends Component {
                                 </div>
                             </div>
                             <p className="mt-0 mb-3 text-center">Min. 0.10 BNB / Max. 10 BNB</p>
-                            <button disabled={ this.props.presaleAvailable } type="submit" className="btn btn-primary btn-block btn-lg">BUY</button>
+                            <button /*{disabled={ this.props.presaleAvailable }}*/ type="submit" className="btn btn-primary btn-block btn-lg">BUY</button>
                         </form>
 
                         <button 
@@ -52,9 +52,8 @@ class Main extends Component {
                         className="btn btn-outline-primary btn-block"
                         onClick={(event) => {
                             event.preventDefault();
-                            // TODO:this.props.releaseTokens();
+                            this.props.claimTokens();
                         }}>
-                        
                             CLAIM MYM
                         </button>
                     </div>
