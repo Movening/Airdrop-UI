@@ -31,7 +31,7 @@ class App extends Component {
 
     // Recoger contrato
     const networkId = await web3.eth.net.getId();
-    if(networkId === 97) {//TODO: cambiar a 56
+    if(networkId === 56) {
       // Asignar contracto
       const presaleContract = new web3.eth.Contract(PresaleContract.abi, PresaleContract.address)
       this.setState({ presaleContract })
