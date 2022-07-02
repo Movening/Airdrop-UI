@@ -1,9 +1,8 @@
 import React, { Component } from 'react';
-import './App.css';
-import Navbar from './Navbar';
-import Main from './Main';
+import Navbar from '../components/Navbar';
+import Main from '../components/Main';
 import Web3 from 'web3';
-import PresaleContract from '../abis/PresaleContract';
+import AirdropContract from '../abis/AirdropContract';
 
 class App extends Component {
   async componentWillMount() {
@@ -33,25 +32,23 @@ class App extends Component {
     const networkId = await web3.eth.net.getId();
     if(networkId === 56) {
       // Asignar contracto
-      const presaleContract = new web3.eth.Contract(PresaleContract.abi, PresaleContract.address)
-      this.setState({ presaleContract })
+      const airdropContract = new web3.eth.Contract(AirdropContract.abi, AirdropContract.address)
+      this.setState({ airdropContract })
       
-      const tokenAddress = await presaleContract.methods.token().call()
+      const tokenAddress = await airdropContract.methods.token().call()
       this.setState({ tokenAddress })
       
-      let presaleEnding = await presaleContract.methods.ending().call()
       let actualTime = Date.now() / 1000 | 0
 
-      // Revisa si está dentro de la whitelist.
-      let whitelist = await presaleContract.methods.whitelist(this.state.account).call()
-      if(whitelist === true && presaleEnding.toNumber() >= actualTime) {
-        this.setState({ buyAvailable: false })
-      }
+      let pendingBalance = await airdropContract.methods.pendingBalanceByAddress(this.state.account).call()
+      pendingBalance = web3.utils.fromWei(pendingBalance.toString(), 'ether')
+      this.setState({ pendingBalance })
 
-      // Recoge tiempo en el que se va a poder hacer claim.
-      let cooldownTime = await presaleContract.methods.claimReady(this.state.account).call()
-      if(cooldownTime.toNumber() <= actualTime && whitelist === true && presaleEnding.toNumber() != 0 && presaleEnding.toNumber() <= actualTime) {
-        this.setState({ claimAvailable: false })
+      // Revisa si está dentro de la whitelist y recoge tiempo en el que se va a poder hacer claim.
+      let whitelist = await airdropContract.methods.whitelistByAddress(this.state.account).call()
+      let cooldownTime = await airdropContract.methods.claimReadyByAddress(this.state.account).call()
+      if(Number(cooldownTime) <= actualTime && whitelist === true && pendingBalance > 0) {
+        this.setState({ claimNotAvailable: false })
       }
 
       this.setState({ loading: false })
@@ -60,21 +57,11 @@ class App extends Component {
     }
   }
 
-  buyTokens = (bnbAmount) => {
-    this.setState({ loading: true });
-
-    this.state.presaleContract.methods.invest().send({ value: bnbAmount, from: this.state.account })
-    .on('confirmation', (confirmationNumber) => {
-      this.setState({ loading: false });
-      window.location.reload();
-    });
-  }
-
   claimTokens = () => {
     this.setState({ loading: true });
 
-    this.state.presaleContract.methods.claimTokens().send({ from: this.state.account })
-    .on('confirmation', (confirmationNumber) => {
+    this.state.airdropContract.methods.claimTokens().send({ from: this.state.account })
+    .on('confirmation', () => {
       this.setState({ loading: false });
       window.location.reload();
     });
@@ -86,8 +73,8 @@ class App extends Component {
       account: '',
       presaleContract: {},
       tokenAddress: {},
-      buyAvailable: true,
-      claimAvailable: true,
+      claimNotAvailable: true,
+      pendingBalance: 0,
       loading: true
     }
   }
@@ -95,14 +82,13 @@ class App extends Component {
   render() {
     let content;
     if(this.state.loading) {
-      content = <p id="loader" className="text-center">Loading...</p>
+      content = <p id="loader" className="text-center mt-5">Loading...</p>
     } else {
       content = <Main 
         tokenAddress={ this.state.tokenAddress }
-        buyTokens={ this.buyTokens }
         claimTokens={ this.claimTokens }
-        buyAvailable={ this.state.buyAvailable }
-        claimAvailable={ this.state.claimAvailable }
+        claimNotAvailable={ this.state.claimNotAvailable }
+        pendingBalance={ this.state.pendingBalance }
       />
     }
 
